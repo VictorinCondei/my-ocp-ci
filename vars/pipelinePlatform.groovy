@@ -54,6 +54,16 @@ def call(Map overrides = [:]) {
                                 overrides.nexusCredentialsId
                         }
 
+                        if (overrides.nodeJavaHome) {
+                            config['node.java.home'] =
+                                overrides.nodeJavaHome
+                        }
+
+                        if (overrides.nodeMavenHome) {
+                            config['node.maven.home'] =
+                                overrides.nodeMavenHome
+                        }
+
                         ciMaven.writeSettings(config)
 
                         writeJSON(
@@ -63,11 +73,13 @@ def call(Map overrides = [:]) {
 
                         
                         sh '''
-				                export JAVA_HOME="${config['node.java.home']}"
-				                export PATH="$PATH:${config['node.maven.home']}"
+				                export JAVA_HOME="${nodeJavaHome}"
+				                export PATH="$PATH:${nodeMavenHome}"
 				                pwd
                                 echo $PATH
+                                echo "=="
                                 ls -la
+                                echo "=="
 		                        mvn clean compile -s settings-ci.xml
 		            '''
                     }
