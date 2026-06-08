@@ -54,15 +54,6 @@ def call(Map overrides = [:]) {
                                 overrides.nexusCredentialsId
                         }
 
-                        if (overrides.nodeJavaHome) {
-                            config['node.java.home'] =
-                                overrides.nodeJavaHome
-                        }
-
-                        if (overrides.nodeMavenHome) {
-                            config['node.maven.home'] =
-                                overrides.nodeMavenHome
-                        }
 
                         ciMaven.writeSettings(config)
 
@@ -73,8 +64,8 @@ def call(Map overrides = [:]) {
 
                         
                         sh '''
-				                export JAVA_HOME="${nodeJavaHome}"
-				                export PATH="$PATH:${nodeMavenHome}"
+				                export JAVA_HOME="/home/jenkins/jdk-25.0.3.9"
+				                export PATH="$PATH:/home/jenkins/apache-maven-3.9.15/bin"
 				                pwd
                                 echo $PATH
                                 echo "=="
