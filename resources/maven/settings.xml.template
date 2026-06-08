@@ -1,0 +1,28 @@
+<settings>
+    <servers>
+         <server>
+            <id>maven-public</id>
+            <username>${ARTIFACT_REPOSITORY_USERNAME}</username>
+            <password>${ARTIFACT_REPOSITORY_PASSWORD}</password>
+        </server>
+        <server>
+            <id>maven-releases</id>
+            <username>${ARTIFACT_REPOSITORY_USERNAME}</username>
+            <password>${ARTIFACT_REPOSITORY_PASSWORD}</password>
+        </server>
+
+        <server>
+            <id>maven-snapshots</id>
+            <username>${ARTIFACT_REPOSITORY_USERNAME}</username>
+            <password>${ARTIFACT_REPOSITORY_PASSWORD}</password>
+        </server>
+    </servers>
+
+    <mirrors>
+        <mirror>
+            <id>maven-public</id>
+            <mirrorOf>*</mirrorOf>
+            <url>${ARTIFACT_REPOSITORY_PUBLIC_URL}</url>
+        </mirror>
+    </mirrors>
+</settings>
