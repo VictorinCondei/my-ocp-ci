@@ -61,11 +61,12 @@ def call(Map overrides = [:]) {
                             json: config
                         )
 
-                        sh 'mvn clean compile -s settings-ci.xml'
+                        
                         sh '''
 				                export JAVA_HOME="${config['node.java.home']}"
 				                export PATH="$PATH:${config['node.maven.home']}"
 				                pwd
+                                echo $PATH
                                 ls -la
 		                        mvn clean compile -s settings-ci.xml
 		            '''
