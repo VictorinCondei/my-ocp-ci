@@ -1,20 +1,20 @@
 def read() {
+    def configFile = env.CI_CONFIG_FILE ?: 'ci.properties'
 
-    def config = readProperties(
-        text: libraryResource("config/${env.CI_CONFIG_FILE}")
+    return readProperties(
+        text: libraryResource("config/${configFile}")
     )
-
-    config['artifact.public.repository.url'] =
-        env.NEXUS_PUBLIC_URL ?: config['artifact.public.repository.url']
-
-    config['artifact.release.repository.url'] =
-        env.NEXUS_RELEASE_URL ?: config['artifact.release.repository.url']
-
-    config['artifact.snapshot.repository.url'] =
-        env.NEXUS_SNAPSHOT_URL ?: config['artifact.snapshot.repository.url']
-
-    config['artifact.repository.credentials.id'] =
-        env.NEXUS_CREDENTIALS_ID ?: config['artifact.repository.credentials.id']
-
-    return config
 }
+
+def requireProperties(Map config, String... propertyNames) {
+
+    propertyNames.each { propertyName ->
+
+        if (!config[propertyName]?.trim()) {
+            error "${propertyName} is not configured"
+        }
+
+    }
+}
+
+return this
