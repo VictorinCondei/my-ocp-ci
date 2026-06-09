@@ -1,4 +1,5 @@
-def call() {
+// vars/pipelineMicroservice.groovy
+def call(Map overrides = [:]) {
     pipeline {
 
         agent { label 'node-unix' }
@@ -14,7 +15,6 @@ def call() {
         stages {
 
             stage('Checkout') {
-                
                 steps {
                     deleteDir()
                     script {
@@ -24,7 +24,6 @@ def call() {
                                 credentialsId: overrides.gitCredentialsId,
                                 url: overrides.gitUrl
                             )
-
                         } else {
                             checkout scm
                             sh "git checkout ${params.Branch}"
@@ -38,6 +37,19 @@ def call() {
                     script {
                         def config = ciConfig.read()
 
+                        if (overrides.nexusPublicUrl) {
+                            config['artifact.public.repository.url'] = overrides.nexusPublicUrl
+                        }
+                        if (overrides.nexusReleaseUrl) {
+                            config['artifact.release.repository.url'] = overrides.nexusReleaseUrl
+                        }
+                        if (overrides.nexusSnapshotUrl) {
+                            config['artifact.snapshot.repository.url'] = overrides.nexusSnapshotUrl
+                        }
+                        if (overrides.nexusCredentialsId) {
+                            config['artifact.repository.credentials.id'] = overrides.nexusCredentialsId
+                        }
+
                         ciConfig.requireProperties(
                                 config,
                                 'artifact.public.repository.url',
@@ -47,9 +59,9 @@ def call() {
 
                         ciMaven.writeSettings(config)
 
-                        env.JAVA_HOME   = config['node.java.home']
-                        env.MAVEN_HOME  = config['node.maven.home']
-                        env.PATH        = "${config['node.maven.home']}:${env.PATH}"
+                        env.JAVA_HOME  = config['node.java.home']
+                        env.MAVEN_HOME = config['node.maven.home']
+                        env.PATH       = "${config['node.maven.home']}:${env.PATH}"
                     }
 
                     sh 'mvn clean compile -Dmaven.repo.local=./fresh-repo -s settings-ci.xml'
@@ -98,7 +110,8 @@ def call() {
                                 returnStdout: true
                         ).trim()
 
-                        def imageTag = "${sanitizeTagPart(params.Branch)}-${version}"
+                        def branchName = overrides.branch ?: params.Branch ?: 'main'
+                        def imageTag   = "${sanitizeTagPart(branchName)}-${version}"
 
                         env.IMAGE_FULL_NAME =
                                 "${config['registry.url']}/${config['registry.namespace']}/${imageName}:${imageTag}"
@@ -122,7 +135,7 @@ def call() {
 
                         sh "podman build -t ${env.IMAGE_FULL_NAME} -f ${env.IMAGE_CONTEXT_DIR}/Containerfile ${env.IMAGE_CONTEXT_DIR}"
 
-                        env.REGISTRY_URL = config['registry.url']
+                        env.REGISTRY_URL            = config['registry.url']
                         env.REGISTRY_CREDENTIALS_ID = config['registry.credentials.id']
                     }
                 }
@@ -136,9 +149,7 @@ def call() {
                                 usernameVariable: 'REGISTRY_USERNAME',
                                 passwordVariable: 'REGISTRY_PASSWORD'
                         )]) {
-
                             podmanLogin(env.REGISTRY_URL)
-
                             sh "podman push ${env.IMAGE_FULL_NAME}"
                         }
                     }
@@ -156,7 +167,7 @@ def call() {
 
 def copyContainerResource(String fileName) {
     def overridePath = "src/main/liberty/config/${fileName}"
-    def targetPath = "${env.IMAGE_CONTEXT_DIR}/${fileName}"
+    def targetPath   = "${env.IMAGE_CONTEXT_DIR}/${fileName}"
 
     if (fileExists(overridePath)) {
         sh "cp ${overridePath} ${targetPath}"
