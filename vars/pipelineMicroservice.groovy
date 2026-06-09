@@ -14,8 +14,9 @@ def call() {
         stages {
 
             stage('Checkout') {
-                deleteDir()
+                
                 steps {
+                    deleteDir()
                     checkout scm
                     sh "git checkout ${params.Branch}"
                 }
