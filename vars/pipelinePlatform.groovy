@@ -2,10 +2,7 @@ def call(Map overrides = [:]) {
 
     pipeline {
         agent { label 'node-unix' }
-        environment {
-            JavaH  = '/home/jenkins/jdk-25.0.3.9'
-	        MvnH  = '/home/jenkins/apache-maven-3.9.15/bin'
-        }
+
         options {
             skipDefaultCheckout(true)
         }
@@ -35,7 +32,6 @@ def call(Map overrides = [:]) {
                     script {
 
                         def config = ciConfig.read()
-
                         if (overrides.nexusPublicUrl) {
                             config['artifact.public.repository.url'] =
                                 overrides.nexusPublicUrl
@@ -63,11 +59,19 @@ def call(Map overrides = [:]) {
                             file: 'effective-config.json',
                             json: config
                         )
+                        if (overrides.nodeJavaHome) {
+                            config['node.java.home'] =
+                                overrides.nodeJavaHome
+                        }
+                        if (overrides.nodeMavenHome) {
+                            config['node.maven.home'] =
+                                overrides.nodeMavenHome
+                        }
 
                         
                         sh '''
-				                export JAVA_HOME="${JavaH}"
-                                export PATH="$PATH:${MvnH}"
+				                export JAVA_HOME="${javaHome}"
+                                export PATH="\$PATH:${mavenHome}"
                                 pwd
                                 echo $PATH
                                 echo "=="
