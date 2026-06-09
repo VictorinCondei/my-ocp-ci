@@ -17,8 +17,17 @@ def call() {
                 
                 steps {
                     deleteDir()
-                    checkout scm
-                    sh "git checkout ${params.Branch}"
+                    if (overrides.gitUrl) {
+                        git(
+                            branch: overrides.branch ?: 'main',
+                            credentialsId: overrides.gitCredentialsId,
+                            url: overrides.gitUrl
+                        )
+
+                    } else {
+                        checkout scm
+                        sh "git checkout ${params.Branch}"
+                    }
                 }
             }
 
