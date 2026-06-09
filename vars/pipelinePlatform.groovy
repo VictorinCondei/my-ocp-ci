@@ -2,7 +2,10 @@ def call(Map overrides = [:]) {
 
     pipeline {
         agent { label 'node-unix' }
-
+        environment {
+            JavaH  = '/home/jenkins/jdk-25.0.3.9'
+	        MvnH  = '/home/jenkins/apache-maven-3.9.15/bin'
+        }
         options {
             skipDefaultCheckout(true)
         }
@@ -11,10 +14,9 @@ def call(Map overrides = [:]) {
 
             stage('Checkout') {
                 steps {
-
+                    deleteDir()
                     script {
                         if (overrides.gitUrl) {
-
                             git(
                                 branch: overrides.branch ?: 'main',
                                 credentialsId: overrides.gitCredentialsId,
@@ -54,7 +56,7 @@ def call(Map overrides = [:]) {
                                 overrides.nexusCredentialsId
                         }
 
-
+                        deleteDir()
                         ciMaven.writeSettings(config)
 
                         writeJSON(
@@ -64,14 +66,14 @@ def call(Map overrides = [:]) {
 
                         
                         sh '''
-				                export JAVA_HOME="/home/jenkins/jdk-25.0.3.9"
-				                export PATH="$PATH:/home/jenkins/apache-maven-3.9.15/bin"
-				                pwd
+				                export JAVA_HOME="${JavaH}"
+                                export PATH="$PATH:${MvnH}"
+                                pwd
                                 echo $PATH
                                 echo "=="
                                 ls -la
                                 echo "=="
-		                        mvn clean compile -s settings-ci.xml
+		                        mvn clean compile -Dmaven.repo.local=./fresh-repo -s settings-ci.xml
 		            '''
                     }
                 }
