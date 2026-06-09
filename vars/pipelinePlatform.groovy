@@ -56,7 +56,7 @@ def call(Map overrides = [:]) {
                                 overrides.nexusCredentialsId
                         }
 
-                        deleteDir()
+
                         ciMaven.writeSettings(config)
 
                         writeJSON(
