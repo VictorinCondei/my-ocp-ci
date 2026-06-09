@@ -14,6 +14,7 @@ def call() {
         stages {
 
             stage('Checkout') {
+                deleteDir()
                 steps {
                     checkout scm
                     sh "git checkout ${params.Branch}"
@@ -27,13 +28,19 @@ def call() {
 
                         ciConfig.requireProperties(
                                 config,
-                                'artifact.public.repository.url'
+                                'artifact.public.repository.url',
+                                'node.java.home',
+                                'node.maven.home'
                         )
 
                         ciMaven.writeSettings(config)
+
+                        env.JAVA_HOME   = config['node.java.home']
+                        env.MAVEN_HOME  = config['node.maven.home']
+                        env.PATH        = "${config['node.maven.home']}:${env.PATH}"
                     }
 
-                    sh 'mvn clean compile -s settings-ci.xml'
+                    sh 'mvn clean compile -Dmaven.repo.local=./fresh-repo -s settings-ci.xml'
                 }
             }
 
