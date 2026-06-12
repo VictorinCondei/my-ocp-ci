@@ -70,14 +70,14 @@ def call(Map overrides = [:]) {
 
                         
                         sh '''
-				                export JAVA_HOME="${javaHome}"
-                                export PATH="\$PATH:${mavenHome}"
+				                export JAVA_HOME="${nodeJavaHome}"
+                                export PATH="\$PATH:${nodeMavenHome}"
                                 pwd
                                 echo $PATH
                                 echo "=="
                                 ls -la
                                 echo "=="
-		                        mvn clean compile -Dmaven.repo.local=./fresh-repo -s settings-ci.xml
+		                        mvn clean compile -Dmaven.repo.local=/myvagrant/cim2 -s settings-ci.xml
 		            '''
                     }
                 }
