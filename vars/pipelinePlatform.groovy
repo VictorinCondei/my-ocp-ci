@@ -67,11 +67,15 @@ def call(Map overrides = [:]) {
                             config['node.maven.home'] =
                                 overrides.nodeMavenHome
                         }
-
-                        
+                        ciConfig.requireProperties(
+                                config,
+                                'node.java.home',
+                                'node.maven.home'
+                        )
+                        env.JAVA_HOME  = config['node.java.home']
+                        env.MAVEN_HOME = config['node.maven.home']
+                        env.PATH       = "${config['node.maven.home']}:${env.PATH}"
                         sh '''
-				                export JAVA_HOME="${nodeJavaHome}"
-                                export PATH="\$PATH:${nodeMavenHome}"
                                 pwd
                                 echo $PATH
                                 echo "=="
