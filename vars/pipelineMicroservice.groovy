@@ -64,7 +64,7 @@ def call(Map overrides = [:]) {
                         env.PATH       = "${config['node.maven.home']}:${env.PATH}"
                     }
 
-                    sh 'pwd; mvn clean compile -s settings-ci.xml'
+                    sh 'pwd; mvn compile -s settings-ci.xml'
                 }
             }
 
