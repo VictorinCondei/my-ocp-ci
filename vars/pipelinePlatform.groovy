@@ -81,7 +81,7 @@ def call(Map overrides = [:]) {
                                 echo "=="
                                 ls -la
                                 echo "=="
-		                        mvn clean compile -Dmaven.repo.local=/myvagrant/cim2 -s settings-ci.xml
+		                        mvn clean compile -Dmaven.repo.local=cim2 -s settings-ci.xml
 		            '''
                     }
                 }
