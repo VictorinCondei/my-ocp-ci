@@ -64,7 +64,7 @@ def call(Map overrides = [:]) {
                         env.PATH       = "${config['node.maven.home']}:${env.PATH}"
                     }
 
-                    sh 'mvn clean compile -Dmaven.repo.local=/home/jenkins/workspace/test-anaf-ocp-ci/cim2 -s settings-ci.xml'
+                    sh 'pwd; mvn clean compile -Dmaven.repo.local=/home/jenkins/workspace/test-anaf-ocp-ci/cim2 -s settings-ci.xml'
                 }
             }
 
