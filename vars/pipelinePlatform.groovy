@@ -42,7 +42,7 @@ def call(Map overrides = [:]) {
                                 overrides.nexusReleaseUrl
                         }
 
-                        if (overrides.nexusSnapshotUrl) {
+                        if (overrides.nexusSnapshotUworkspace/CloneBuildTemplate/gitops_repo/target/classes/ro/anaf/platform/restantapfrl) {
                             config['artifact.snapshot.repository.url'] =
                                 overrides.nexusSnapshotUrl
                         }
@@ -81,7 +81,7 @@ def call(Map overrides = [:]) {
                                 echo "=="
                                 ls -la
                                 echo "=="
-		                        mvn clean compile -Dmaven.repo.local=cim2 -s settings-ci.xml
+		                        mvn clean compile -s settings-ci.xml
 		            '''
                     }
                 }
