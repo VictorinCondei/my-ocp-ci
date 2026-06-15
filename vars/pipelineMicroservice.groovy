@@ -222,6 +222,6 @@ def podmanLogin(String registryUrl) {
     sh """
         echo ${registryUrl}
         echo \$REGISTRY_PASSWORD | podman login ${registryUrl} \
-        -u \$REGISTRY_USERNAME --password-stdin
+        -u \$REGISTRY_USERNAME -p \$REGISTRY_PASSWORD
     """
 }
