@@ -144,6 +144,16 @@ def call(Map overrides = [:]) {
             stage('Publish Image') {
                 steps {
                     script {
+                        def config = ciConfig.read()
+
+                        ciConfig.requireProperties(
+                                config,
+                                'registry.url',
+                                'registry.namespace',
+                                'registry.credentials.id'
+                        )
+                        env.REGISTRY_URL            = config['registry.url']
+                        env.REGISTRY_CREDENTIALS_ID = config['registry.credentials.id']
                         withCredentials([usernamePassword(
                                 credentialsId: env.REGISTRY_CREDENTIALS_ID,
                                 usernameVariable: 'REGISTRY_USERNAME',
