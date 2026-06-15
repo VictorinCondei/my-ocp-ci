@@ -167,6 +167,9 @@ def call(Map overrides = [:]) {
                         if (overrides.registryCredentialsId) {
                             config['registry.credentials.id'] = overrides.registryCredentialsId
                         }
+                        if (overrides.registryUrl) {
+                            config['registry.url'] = overrides.registryUrl
+                        }                        
                         env.REGISTRY_URL            = config['registry.url']
                         env.REGISTRY_CREDENTIALS_ID = config['registry.credentials.id']
                         withCredentials([usernamePassword(
