@@ -161,7 +161,9 @@ def call(Map overrides = [:]) {
 
         post {
             always {
-                deleteDir()
+                sh """
+                    echo "Post STEP"
+                """
             }
         }
     }
