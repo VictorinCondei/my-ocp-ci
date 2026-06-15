@@ -149,6 +149,8 @@ def call(Map overrides = [:]) {
                                 usernameVariable: 'REGISTRY_USERNAME',
                                 passwordVariable: 'REGISTRY_PASSWORD'
                         )]) {
+                            echo "insdie publish"
+                            pwd
                             podmanLogin(env.REGISTRY_URL)
                             sh "podman push ${env.IMAGE_FULL_NAME}"
                         }
@@ -188,6 +190,7 @@ def sanitizeTagPart(String value) {
 
 def podmanLogin(String registryUrl) {
     sh """
+        echo ${registryUrl}
         echo \$REGISTRY_PASSWORD | podman login ${registryUrl} \
         -u \$REGISTRY_USERNAME --password-stdin
     """
