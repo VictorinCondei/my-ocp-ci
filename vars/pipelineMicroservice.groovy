@@ -145,7 +145,18 @@ def call(Map overrides = [:]) {
                 steps {
                     script {
                         def config = ciConfig.read()
-
+                        if (overrides.nexusPublicUrl) {
+                            config['artifact.public.repository.url'] = overrides.nexusPublicUrl
+                        }
+                        if (overrides.nexusReleaseUrl) {
+                            config['artifact.release.repository.url'] = overrides.nexusReleaseUrl
+                        }
+                        if (overrides.nexusSnapshotUrl) {
+                            config['artifact.snapshot.repository.url'] = overrides.nexusSnapshotUrl
+                        }
+                        if (overrides.nexusCredentialsId) {
+                            config['artifact.repository.credentials.id'] = overrides.nexusCredentialsId
+                        }
                         ciConfig.requireProperties(
                                 config,
                                 'registry.url',
