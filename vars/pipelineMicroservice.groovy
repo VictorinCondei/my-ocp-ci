@@ -145,6 +145,13 @@ def call(Map overrides = [:]) {
                 steps {
                     script {
                         def config = ciConfig.read()
+                        ciConfig.requireProperties(
+                                config,
+                                'registry.url',
+                                'registry.namespace',
+                                'registry.credentials.id'
+                        )
+
                         if (overrides.nexusPublicUrl) {
                             config['artifact.public.repository.url'] = overrides.nexusPublicUrl
                         }
@@ -157,12 +164,9 @@ def call(Map overrides = [:]) {
                         if (overrides.nexusCredentialsId) {
                             config['artifact.repository.credentials.id'] = overrides.nexusCredentialsId
                         }
-                        ciConfig.requireProperties(
-                                config,
-                                'registry.url',
-                                'registry.namespace',
-                                'registry.credentials.id'
-                        )
+                        if (overrides.registryCredentialsId) {
+                            config['registry.credentials.id'] = overrides.registryCredentialsId
+                        }
                         env.REGISTRY_URL            = config['registry.url']
                         env.REGISTRY_CREDENTIALS_ID = config['registry.credentials.id']
                         withCredentials([usernamePassword(
