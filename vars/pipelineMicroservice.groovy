@@ -75,8 +75,6 @@ def call(Map overrides = [:]) {
 
                         sh "podman build -t ${env.IMAGE_FULL_NAME} -f ${env.IMAGE_CONTEXT_DIR}/Containerfile ${env.IMAGE_CONTEXT_DIR}"
 
-                        env.REGISTRY_URL            = config['registry.url']
-                        env.REGISTRY_CREDENTIALS_ID = config['registry.credentials.id']
                     }
                 }
             }
