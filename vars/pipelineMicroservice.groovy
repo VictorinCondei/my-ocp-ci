@@ -97,9 +97,7 @@ def call(Map overrides = [:]) {
 
         post {
             always {
-                sh """
-                    echo "Post STEP"
-                """
+                deleteDir()
             }
         }
     }
@@ -134,7 +132,6 @@ def loadConfig(Map overrides) {
 /**
  * Resolves env.IMAGE_FULL_NAME and env.FINAL_NAME by running shell commands
  * (git, mvn) that are only available inside a steps/script block.
- * Called once at the start of Build Image.
  */
 def resolveImageFullName(Map overrides) {
     def repositoryUrl = sh(
@@ -143,11 +140,19 @@ def resolveImageFullName(Map overrides) {
     ).trim()
     def imageName = repositoryUrl.tokenize('/').last().replace('.git', '')
     def version = sh(
+
+def copyContainerResource(String fileName) {
+    def overridePath = "src/main/liberty/config/${fileName}"
+    def targetPath   = "${env.IMAGE_CONTEXT_DIR}/${file
             script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout",
             returnStdout: true
     ).trim()
     def finalName = sh(
-            script: "mvn help:evaluate -Dexpression=project.build.finalName -q -DforceStdout -Pspring-boot-app",
+            script: "mvn help:evaluate -Dexpression=p
+
+def copyContainerResource(String fileName) {
+    def overridePath = "src/main/liberty/config/${fileName}"
+    def targetPath   = "${env.IMAGE_CONTEXT_DIR}/${fileroject.build.finalName -q -DforceStdout -Pspring-boot-app",
             returnStdout: true
     ).trim()
     def branchName = overrides.branch ?: params.Branch ?: 'main'
