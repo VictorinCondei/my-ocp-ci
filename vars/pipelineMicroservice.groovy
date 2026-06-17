@@ -143,27 +143,6 @@ def resolveImageFullName(Map overrides) {
 
 def copyContainerResource(String fileName) {
     def overridePath = "src/main/liberty/config/${fileName}"
-    def targetPath   = "${env.IMAGE_CONTEXT_DIR}/${file
-            script: "mvn help:evaluate -Dexpression=project.version -q -DforceStdout",
-            returnStdout: true
-    ).trim()
-    def finalName = sh(
-            script: "mvn help:evaluate -Dexpression=p
-
-def copyContainerResource(String fileName) {
-    def overridePath = "src/main/liberty/config/${fileName}"
-    def targetPath   = "${env.IMAGE_CONTEXT_DIR}/${fileroject.build.finalName -q -DforceStdout -Pspring-boot-app",
-            returnStdout: true
-    ).trim()
-    def branchName = overrides.branch ?: params.Branch ?: 'main'
-    def imageTag   = "${sanitizeTagPart(branchName)}-${version}"
-    env.FINAL_NAME      = finalName
-    env.IMAGE_FULL_NAME = "${env.REGISTRY_URL}/${env.REGISTRY_NAMESPACE}/${imageName}:${imageTag}"
-    echo "Image: ${env.IMAGE_FULL_NAME}"
-}
-
-def copyContainerResource(String fileName) {
-    def overridePath = "src/main/liberty/config/${fileName}"
     def targetPath   = "${env.IMAGE_CONTEXT_DIR}/${fileName}"
 
     if (fileExists(overridePath)) {

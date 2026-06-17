@@ -1,7 +1,7 @@
 def call(Map overrides = [:]) {
 
     pipeline {
-        agent { label 'node-unix' }
+        agent { label overrides.agentLabel ?: 'node-unix' }
 
         options {
             skipDefaultCheckout(true)
