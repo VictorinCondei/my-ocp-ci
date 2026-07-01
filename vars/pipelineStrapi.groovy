@@ -49,7 +49,7 @@ def call(Map config = [:]) {
                     script {
                         if (overrides.gitUrl) {
                             git(
-                                branch: overrides.branch ?: 'master',
+                                branch: 'master',
                                 credentialsId: overrides.gitCredentialsId,
                                 url: overrides.gitUrl
                             )
