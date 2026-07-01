@@ -57,6 +57,7 @@ def call(Map config = [:]) {
                             checkout scm
                             sh "git checkout master"
                         }
+                    }
                 }
             }
 
@@ -118,3 +119,4 @@ def call(Map config = [:]) {
         }
     }
 }
+
