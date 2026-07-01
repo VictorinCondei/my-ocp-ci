@@ -47,16 +47,16 @@ def call(Map config = [:]) {
                 steps {
                     deleteDir()
                     script {
-                        if (overrides.gitUrl) {
+                        //if (overrides.gitUrl) {
                             git(
                                 branch: 'master',
-                                credentialsId: overrides.gitCredentialsId,
+                                credentialsId: gitCredentialsId,
                                 url: overrides.gitUrl
                             )
-                        } else {
-                            checkout scm
-                            sh "git checkout master"
-                        }
+                        //} else {
+                        //    checkout scm
+                        //    sh "git checkout master"
+                        //}
                     }
                 }
             }
