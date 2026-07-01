@@ -45,24 +45,25 @@ def call(Map config = [:]) {
         stages {
             stage('Checkout') {
                 steps {
-                    checkout scm
-                }
-            }
-
-            stage('Validate') {
-                steps {
                     deleteDir()
                     script {
                         if (overrides.gitUrl) {
                             git(
-                                branch: overrides.branch ?: 'main',
+                                branch: overrides.branch ?: 'master',
                                 credentialsId: overrides.gitCredentialsId,
                                 url: overrides.gitUrl
                             )
                         } else {
                             checkout scm
-                            sh "git checkout ${params.Branch}"
+                            sh "git checkout master"
                         }
+                }
+            }
+
+            stage('Validate') {
+                steps {
+                    script {
+                        validateStrapiProject()
                     }
                 }
             }
