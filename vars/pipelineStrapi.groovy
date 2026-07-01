@@ -54,8 +54,8 @@ def call(Map config = [:]) {
                     )
                     script {
                             // GIT_COMMIT is now available after checkout
-                            def shortSha = env.GIT_COMMIT?.take(8) ?: 'unknown'
-                            env.IMAGE_TAG  = "${env.BUILD_NUMBER}-${shortSha}"
+                            def shortShan = env.GIT_COMMIT?.take(8) ?: 'unknown'
+                            env.IMAGE_TAG  = "${env.BUILD_NUMBER}-${shortShan}"
                             env.FULL_IMAGE = "${registry}/${organization}/${imageName}"
                         }
                 }
