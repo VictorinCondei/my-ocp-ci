@@ -3,6 +3,8 @@
 def call(Map config = [:]) {
 
     // ── required parameters ──────────────────────────────────────────────
+    def gitUrl      = config.get('gitUrl','https://github.com/VictorinCondei/ocp-frontend-ci.git')
+    def gitCredentialsId = config.get('gitCredentialsId', 'github-Victorin')
     def registry      = config.get('registry',     'quay.apps.ocp1.cpd.fiscnet.ro')
     def organization  = config.get('organization', 'portal')
     def imageName     = config.imageName ?: error('imageName is required')
@@ -49,8 +51,18 @@ def call(Map config = [:]) {
 
             stage('Validate') {
                 steps {
+                    deleteDir()
                     script {
-                        validateStrapiProject()
+                        if (overrides.gitUrl) {
+                            git(
+                                branch: overrides.branch ?: 'main',
+                                credentialsId: overrides.gitCredentialsId,
+                                url: overrides.gitUrl
+                            )
+                        } else {
+                            checkout scm
+                            sh "git checkout ${params.Branch}"
+                        }
                     }
                 }
             }
