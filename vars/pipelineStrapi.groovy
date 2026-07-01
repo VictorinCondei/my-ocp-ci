@@ -3,21 +3,22 @@
 def call(Map config = [:]) {
 
     // ── required parameters ──────────────────────────────────────────────
-    def gitUrl      = config.get('gitUrl','https://github.com/VictorinCondei/ocp-frontend-ci.git')
+    def gitUrl           = config.get('gitUrl',           '[github.com](https://github.com/VictorinCondei/ocp-frontend-ci.git)')
     def gitCredentialsId = config.get('gitCredentialsId', 'github-Victorin')
-    def registry      = config.get('registry',     'quay.apps.ocp1.cpd.fiscnet.ro')
-    def organization  = config.get('organization', 'portal')
-    def imageName     = config.imageName ?: error('imageName is required')
-    def credentialsId = config.get('credentialsId', 'quay-robot-creds')
+    def registry         = config.get('registry',         'quay.apps.ocp1.cpd.fiscnet.ro')
+    def organization     = config.get('organization',     'portal')
+    def imageName        = config.imageName ?: error('imageName is required')
+    def credentialsId    = config.get('credentialsId',    'quay-robot-creds')
 
     // ── optional parameters ──────────────────────────────────────────────
-    def nodeLabel     = config.get('nodeLabel',   'jenkins-node')
-    def dockerContext = config.get('context',     '.')
-    def dockerfile    = config.get('dockerfile',  'Dockerfile')
-    def pushLatest    = config.get('pushLatest',  true)
-    def extraBuildArgs= config.get('buildArgs',   '')
+    def gitBranch      = config.get('branch',     'main')
+    def nodeLabel      = config.get('nodeLabel',  'jenkins-node')
+    def dockerContext  = config.get('context',    '.')
+    def dockerfile     = config.get('dockerfile', 'Dockerfile')
+    def pushLatest     = config.get('pushLatest', true)
+    def extraBuildArgs = config.get('buildArgs',  '')
 
-    // ── derived values  ─────────────────────────────────
+    // ── derived values ───────────────────────────────────────────────────
     def shortSha  = env.GIT_COMMIT?.take(8) ?: 'unknown'
     def imageTag  = "${env.BUILD_NUMBER}-${shortSha}"
     def fullImage = "${registry}/${organization}/${imageName}"
@@ -46,18 +47,17 @@ def call(Map config = [:]) {
             stage('Checkout') {
                 steps {
                     deleteDir()
+                    git(
+                        branch:        gitBranch,
+                        credentialsId: gitCredentialsId,
+                        url:           gitUrl
+                    )
                     script {
-                        //if (overrides.gitUrl) {
-                            git(
-                                branch: 'master',
-                                credentialsId: gitCredentialsId,
-                                url: overrides.gitUrl
-                            )
-                        //} else {
-                        //    checkout scm
-                        //    sh "git checkout master"
-                        //}
-                    }
+                            // GIT_COMMIT is now available after checkout
+                            def shortSha = env.GIT_COMMIT?.take(8) ?: 'unknown'
+                            env.IMAGE_TAG  = "${env.BUILD_NUMBER}-${shortSha}"
+                            env.FULL_IMAGE = "${registry}/${organization}/${imageName}"
+                        }
                 }
             }
 
@@ -119,4 +119,3 @@ def call(Map config = [:]) {
         }
     }
 }
-
