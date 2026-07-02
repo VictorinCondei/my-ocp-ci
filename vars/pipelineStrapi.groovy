@@ -43,10 +43,7 @@ def call(Map config = [:]) {
                         url: gitUrl
                     )
                     script {
-                        def shortSha = env.GIT_COMMIT?.take(8) ?: 'unknown'
-                        env.IMAGE_TAG = "${env.BUILD_NUMBER}-${shortSha}"
-                        env.FULL_IMAGE = "${env.REGISTRY}/${env.ORGANIZATION}/${env.IMAGE_NAME}"
-
+                        resolveImageMeta()
                         echo "Checked out ${gitUrl} branch ${gitBranch}"
                         echo "Resolved image: ${env.FULL_IMAGE}:${env.IMAGE_TAG}"
                     }
@@ -64,7 +61,6 @@ def call(Map config = [:]) {
             stage('Build Image') {
                 steps {
                     script {
-                        resolveImageMeta()
                         buildStrapiImage(
                             fullImage: env.FULL_IMAGE,
                             tag: env.IMAGE_TAG,
