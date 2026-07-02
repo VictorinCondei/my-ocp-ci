@@ -1,33 +1,36 @@
-FROM registry.access.redhat.com/ubi8/nodejs-18:latest AS builder
+FROM node:22-alpine AS build
+RUN apk update && apk add --no-cache build-base gcc autoconf automake zlib-dev libpng-dev bash vips-dev git > /dev/null 2>&1
 
-WORKDIR /app
-RUN chown -R 1001:0 /app && chmod -R g+rwX /app
-USER 1001
+WORKDIR /opt/
+COPY package.json package-lock.json ./
+RUN npm install -g node-gyp
+RUN npm config set fetch-retry-maxtimeout 600000 -g && npm ci
+ENV PATH=/opt/node_modules/.bin:$PATH
 
-COPY package*.json ./
-RUN npm ci
-
+WORKDIR /opt/app
 COPY . .
-RUN npm run build
-RUN npm prune --omit=dev
-
-FROM registry.access.redhat.com/ubi8/nodejs-18-minimal:latest
-
-WORKDIR /app
-RUN chown -R 1001:0 /app && chmod -R g+rwX /app
-
 ENV NODE_ENV=production
-ENV HOST=0.0.0.0
-ENV PORT=1337
+RUN npm run build
 
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/config ./config
-COPY --from=builder /app/public ./public
+# Production stage
+FROM node:22-alpine
+RUN apk add --no-cache vips-dev
+ENV NODE_ENV=production
 
-USER 1001
+WORKDIR /opt/
+COPY --from=build /opt/package.json /opt/package-lock.json ./
+RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force  # --omit=dev replaces the deprecated --only=production
+ENV PATH=/opt/node_modules/.bin:$PATH
 
+WORKDIR /opt/app
+COPY --from=build /opt/app ./
+
+RUN chown -R node:node /opt/app /opt/node_modules && \
+    mkdir -p /opt/app/.config && \
+    chown -R node:node /opt/app/.config
+
+ENV HOME=/opt/app
+USER node
 EXPOSE 1337
 
-CMD ["node", "node_modules/.bin/strapi", "start"]
+CMD ["npm", "run", "start"]

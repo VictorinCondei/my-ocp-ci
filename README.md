@@ -35,15 +35,17 @@ Example Jenkinsfile:
 @Library('anaf-ocp-frontend-ci') _
 
 pipelineStrapi(
-    registry:      'quay.apps.ocp1.cpd.fiscnet.ro',
-    organization:  'portal',
-    imageName:     'anaf-ocp-service-registre',
-    credentialsId: 'quay-robot-creds',
-    branch:        'main',
-    nodeLabel:     'jenkins-node',
-    dockerfile:    'Dockerfile',
-    context:       '.',
-    pushLatest:    true,
-    buildArgs:     'NODE_ENV=production DATABASE_CLIENT=postgres'
+    gitUrl:             'https://git-p.ocp1.csd.fiscnet.ro/test/frontend/dashboard-anaf-portal-public',
+    branch:             'main',
+    gitCredentialsId:   'gitlab-ssh-key',
+    registry:           'quay.apps.ocp1.cpd.fiscnet.ro',
+    organization:       'portal',
+    imageName:          'anaf-ocp-frontend-strapi',
+    credentialsId:      'quay-creds',
+    nodeLabel:          'node-unix',
+    dockerfile:         'Dockerfile',
+    context:            '.',
+    pushLatest:         true,
+    buildArgs:          'NODE_ENV=production DATABASE_CLIENT=postgres'
 )
 ```
