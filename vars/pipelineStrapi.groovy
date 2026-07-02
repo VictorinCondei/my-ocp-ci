@@ -58,7 +58,7 @@ def call(Map config = [:]) {
             stage('Validate') {
                 steps {
                     script {
-//                        validateStrapiProject()
+                        ;
                     }
                 }
             }
