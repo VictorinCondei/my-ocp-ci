@@ -1,27 +1,19 @@
 #!/usr/bin/env groovy
 
 def call(Map config = [:]) {
-
-    // ── required parameters ──────────────────────────────────────────────
-    def gitUrl           = config.get('gitUrl',           '[github.com](https://github.com/VictorinCondei/ocp-frontend-ci.git)')
+    def gitUrl           = config.get('gitUrl', '[github.com](https://github.com/VictorinCondei/ocp-frontend-ci.git)')
     def gitCredentialsId = config.get('gitCredentialsId', 'github-Victorin')
-    def registry         = config.get('registry',         'quay.apps.ocp1.cpd.fiscnet.ro')
-    def organization     = config.get('organization',     'portal')
+    def registry         = config.get('registry', 'quay.apps.ocp1.cpd.fiscnet.ro')
+    def organization     = config.get('organization', 'portal')
     def imageName        = config.imageName ?: error('imageName is required')
-    def credentialsId    = config.get('credentialsId',    'quay-robot-creds')
+    def credentialsId    = config.get('credentialsId', 'quay-robot-creds')
 
-    // ── optional parameters ──────────────────────────────────────────────
-    def gitBranch      = config.get('branch',     'main')
-    def nodeLabel      = config.get('nodeLabel',  'jenkins-node')
-    def dockerContext  = config.get('context',    '.')
-    def dockerfile     = config.get('dockerfile', 'Dockerfile')
-    def pushLatest     = config.get('pushLatest', true)
-    def extraBuildArgs = config.get('buildArgs',  '')
-
-    // ── derived values ───────────────────────────────────────────────────
-    def shortSha  = env.GIT_COMMIT?.take(8) ?: 'unknown'
-    def imageTag  = "${env.BUILD_NUMBER}-${shortSha}"
-    def fullImage = "${registry}/${organization}/${imageName}"
+    def gitBranch        = config.get('branch', 'main')
+    def nodeLabel        = config.get('nodeLabel', 'jenkins-node')
+    def dockerContext    = config.get('context', '.')
+    def dockerfile       = config.get('dockerfile', 'Dockerfile')
+    def pushLatest       = config.get('pushLatest', true)
+    def extraBuildArgs   = config.get('buildArgs', '')
 
     pipeline {
         agent { label nodeLabel }
@@ -36,11 +28,11 @@ def call(Map config = [:]) {
             REGISTRY       = "${registry}"
             ORGANIZATION   = "${organization}"
             IMAGE_NAME     = "${imageName}"
-            FULL_IMAGE     = "${fullImage}"
-            IMAGE_TAG      = "${imageTag}"
             DOCKERFILE     = "${dockerfile}"
             DOCKER_CONTEXT = "${dockerContext}"
             BUILD_ARGS     = "${extraBuildArgs}"
+            IMAGE_TAG      = ''
+            FULL_IMAGE     = ''
         }
 
         stages {
@@ -48,16 +40,18 @@ def call(Map config = [:]) {
                 steps {
                     deleteDir()
                     git(
-                        branch:        gitBranch,
+                        branch: gitBranch,
                         credentialsId: gitCredentialsId,
-                        url:           gitUrl
+                        url: gitUrl
                     )
                     script {
-                            // GIT_COMMIT is now available after checkout
-                            def shortShan = env.GIT_COMMIT?.take(8) ?: 'unknown'
-                            env.IMAGE_TAG  = "${env.BUILD_NUMBER}-${shortShan}"
-                            env.FULL_IMAGE = "${registry}/${organization}/${imageName}"
-                        }
+                        def shortSha = env.GIT_COMMIT?.take(8) ?: 'unknown'
+                        env.IMAGE_TAG = "${env.BUILD_NUMBER}-${shortSha}"
+                        env.FULL_IMAGE = "${env.REGISTRY}/${env.ORGANIZATION}/${env.IMAGE_NAME}"
+
+                        echo "Checked out ${gitUrl} branch ${gitBranch}"
+                        echo "Resolved image: ${env.FULL_IMAGE}:${env.IMAGE_TAG}"
+                    }
                 }
             }
 
@@ -73,11 +67,11 @@ def call(Map config = [:]) {
                 steps {
                     script {
                         buildStrapiImage(
-                            fullImage:  fullImage,
-                            tag:        imageTag,
-                            dockerfile: dockerfile,
-                            context:    dockerContext,
-                            buildArgs:  extraBuildArgs
+                            fullImage: env.FULL_IMAGE,
+                            tag: env.IMAGE_TAG,
+                            dockerfile: env.DOCKERFILE,
+                            context: env.DOCKER_CONTEXT,
+                            buildArgs: env.BUILD_ARGS
                         )
                     }
                 }
@@ -87,11 +81,11 @@ def call(Map config = [:]) {
                 steps {
                     script {
                         pushImageToQuay(
-                            registry:      registry,
-                            fullImage:     fullImage,
-                            tag:           imageTag,
+                            registry: env.REGISTRY,
+                            fullImage: env.FULL_IMAGE,
+                            tag: env.IMAGE_TAG,
                             credentialsId: credentialsId,
-                            pushLatest:    pushLatest
+                            pushLatest: pushLatest
                         )
                     }
                 }
@@ -100,7 +94,7 @@ def call(Map config = [:]) {
             stage('Cleanup') {
                 steps {
                     script {
-                        cleanupImages(fullImage, imageTag)
+                        cleanupImages(env.FULL_IMAGE, env.IMAGE_TAG, pushLatest)
                     }
                 }
             }
@@ -108,13 +102,13 @@ def call(Map config = [:]) {
 
         post {
             always {
-                sh "podman logout ${registry} || true"
+                sh "podman logout ${env.REGISTRY} || true"
             }
             success {
-                echo "Image pushed successfully: ${fullImage}:${imageTag}"
+                echo "Image pushed successfully: ${env.FULL_IMAGE}:${env.IMAGE_TAG}"
             }
             failure {
-                echo "Pipeline failed for image: ${fullImage}:${imageTag}"
+                echo "Pipeline failed for image: ${env.FULL_IMAGE}:${env.IMAGE_TAG}"
             }
         }
     }

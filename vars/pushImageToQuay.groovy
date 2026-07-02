@@ -1,9 +1,9 @@
 #!/usr/bin/env groovy
 
 def call(Map config = [:]) {
-    def registry      = config.registry
-    def fullImage     = config.fullImage
-    def tag           = config.tag
+    def registry      = config.registry ?: error('registry is required')
+    def fullImage     = config.fullImage ?: error('fullImage is required')
+    def tag           = config.tag ?: error('tag is required')
     def credentialsId = config.get('credentialsId', 'quay-robot-creds')
     def pushLatest    = config.get('pushLatest', true)
 
@@ -13,20 +13,22 @@ def call(Map config = [:]) {
         passwordVariable: 'QUAY_PASS'
     )]) {
         echo "Logging in to ${registry}"
-        sh '''
-            echo "$QUAY_PASS" | podman login ''' + registry + ''' \
-              --username "$QUAY_USER" \
+        sh """
+            set +x
+            echo "\$QUAY_PASS" | podman login '${registry}' \
+              --username "\$QUAY_USER" \
               --password-stdin
-        '''
+        """
 
         echo "Pushing image: ${fullImage}:${tag}"
-        sh "podman push ${fullImage}:${tag}"
+        sh "podman push '${fullImage}:${tag}'"
 
         if (pushLatest) {
-            echo "Tagging and pushing :latest"
+            echo "Tagging and pushing latest"
             sh """
-                podman tag ${fullImage}:${tag} ${fullImage}:latest
-                podman push ${fullImage}:latest
+                set -eu
+                podman tag '${fullImage}:${tag}' '${fullImage}:latest'
+                podman push '${fullImage}:latest'
             """
         }
     }

@@ -3,11 +3,9 @@ FROM registry.access.redhat.com/ubi8/nodejs-18:latest AS builder
 WORKDIR /app
 
 COPY package*.json ./
-
 RUN npm ci --only=production
 
 COPY . .
-
 RUN npm run build
 
 FROM registry.access.redhat.com/ubi8/nodejs-18-minimal:latest
@@ -19,11 +17,10 @@ ENV HOST=0.0.0.0
 ENV PORT=1337
 
 COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/node_modules  ./node_modules
-COPY --from=builder /app/dist          ./dist
-COPY --from=builder /app/config        ./config
-COPY --from=builder /app/public        ./public
-COPY --from=builder /app/.env          ./.env 2>/dev/null || true
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/config ./config
+COPY --from=builder /app/public ./public
 
 EXPOSE 1337
 
