@@ -31,8 +31,6 @@ def call(Map config = [:]) {
             DOCKERFILE     = "${dockerfile}"
             DOCKER_CONTEXT = "${dockerContext}"
             BUILD_ARGS     = "${extraBuildArgs}"
-            IMAGE_TAG      = ''
-            FULL_IMAGE     = ''
         }
 
         stages {
@@ -66,6 +64,7 @@ def call(Map config = [:]) {
             stage('Build Image') {
                 steps {
                     script {
+                        resolveImageMeta()
                         buildStrapiImage(
                             fullImage: env.FULL_IMAGE,
                             tag: env.IMAGE_TAG,
