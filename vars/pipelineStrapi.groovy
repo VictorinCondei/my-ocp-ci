@@ -43,9 +43,9 @@ def call(Map config = [:]) {
                         url: gitUrl
                     )
                     script {
-                        resolveImageMeta()
+                        def meta = resolveImageMeta(registry, organization, imageName)
                         echo "Checked out ${gitUrl} branch ${gitBranch}"
-                        echo "Resolved image: ${env.FULL_IMAGE}:${env.IMAGE_TAG}"
+                        echo "Resolved image: ${meta.fullImage}:${meta.imageTag}"
                     }
                 }
             }
@@ -53,7 +53,7 @@ def call(Map config = [:]) {
             stage('Validate') {
                 steps {
                     script {
-                        echo"Validate";
+                        validateStrapiProject()
                     }
                 }
             }
@@ -61,12 +61,14 @@ def call(Map config = [:]) {
             stage('Build Image') {
                 steps {
                     script {
+                        def meta = resolveImageMeta(registry, organization, imageName)
+
                         buildStrapiImage(
-                            fullImage: env.FULL_IMAGE,
-                            tag: env.IMAGE_TAG,
-                            dockerfile: env.DOCKERFILE,
-                            context: env.DOCKER_CONTEXT,
-                            buildArgs: env.BUILD_ARGS
+                            fullImage: meta.fullImage,
+                            tag: meta.imageTag,
+                            dockerfile: dockerfile,
+                            context: dockerContext,
+                            buildArgs: extraBuildArgs
                         )
                     }
                 }
@@ -75,10 +77,12 @@ def call(Map config = [:]) {
             stage('Push Image') {
                 steps {
                     script {
+                        def meta = resolveImageMeta(registry, organization, imageName)
+
                         pushImageToQuay(
-                            registry: env.REGISTRY,
-                            fullImage: env.FULL_IMAGE,
-                            tag: env.IMAGE_TAG,
+                            registry: registry,
+                            fullImage: meta.fullImage,
+                            tag: meta.imageTag,
                             credentialsId: credentialsId,
                             pushLatest: pushLatest
                         )
@@ -89,7 +93,8 @@ def call(Map config = [:]) {
             stage('Cleanup') {
                 steps {
                     script {
-                        cleanupImages(env.FULL_IMAGE, env.IMAGE_TAG, pushLatest)
+                        def meta = resolveImageMeta(registry, organization, imageName)
+                        cleanupImages(meta.fullImage, meta.imageTag, pushLatest)
                     }
                 }
             }
@@ -97,14 +102,35 @@ def call(Map config = [:]) {
 
         post {
             always {
-                sh "podman logout ${env.REGISTRY} || true"
+                sh "podman logout ${registry} || true"
             }
             success {
-                echo "Image pushed successfully: ${env.FULL_IMAGE}:${env.IMAGE_TAG}"
+                script {
+                    def meta = resolveImageMeta(registry, organization, imageName)
+                    echo "Image pushed successfully: ${meta.fullImage}:${meta.imageTag}"
+                }
             }
             failure {
-                echo "Pipeline failed for image: ${env.FULL_IMAGE}:${env.IMAGE_TAG}"
+                script {
+                    def meta = resolveImageMeta(registry, organization, imageName)
+                    echo "Pipeline failed for image: ${meta.fullImage}:${meta.imageTag}"
+                }
             }
         }
     }
+}
+
+def resolveImageMeta(String registry, String organization, String imageName) {
+    def shortSha = env.GIT_COMMIT?.take(8)
+    if (!shortSha) {
+        shortSha = sh(
+            script: "git rev-parse --short=8 HEAD",
+            returnStdout: true
+        ).trim()
+    }
+
+    return [
+        fullImage: "${registry}/${organization}/${imageName}",
+        imageTag : "${env.BUILD_NUMBER}-${shortSha}"
+    ]
 }
