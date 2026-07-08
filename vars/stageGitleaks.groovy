@@ -11,13 +11,8 @@ def call(Map config = [:]) {
 
     stage('Security — Gitleaks') {
 
-        // Create output dir inside the workspace
-        sh "mkdir -p ${reportDir}"
+        sh "[ -e ${reportDir} ] || mkdir -p ${reportDir}"
 
-        // Run Gitleaks inside a container that mounts the workspace.
-        // --no-git prevents Gitleaks from trying to traverse .git while
-        //   the workspace is already a detached checkout on many CI agents.
-        // Remove --no-git if you want full history scanning.
         int exitCode = sh(
             returnStatus: true,
             script: """
@@ -35,13 +30,11 @@ def call(Map config = [:]) {
             """
         )
 
-        // Archive the SARIF report regardless of outcome
         archiveArtifacts(
             artifacts: "${reportDir}/gitleaks-report.sarif",
             allowEmptyArchive: true
         )
 
-        // Optionally publish with the Warnings-NG / SARIF plugin
         if (fileExists(reportFile)) {
             recordIssues(
                 tools: [sarif(pattern: reportFile, id: 'gitleaks', name: 'Gitleaks')],

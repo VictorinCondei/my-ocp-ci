@@ -11,10 +11,8 @@ def call(Map config = [:]) {
 
     stage('Security — GitLab Secret Detection') {
 
-        sh "mkdir -p ${reportDir}"
+        sh "[ -e ${reportDir} ] || mkdir -p ${reportDir}"
 
-        // The GitLab analyzer reads CI_PROJECT_DIR and writes to
-        // gl-secret-detection-report.json in that directory.
         int exitCode = sh(
             returnStatus: true,
             script: """
@@ -36,7 +34,6 @@ def call(Map config = [:]) {
             allowEmptyArchive: true
         )
 
-        // Parse the JSON report and count real vulnerabilities
         int vulnCount = 0
         if (fileExists(reportFile)) {
             def report = readJSON file: reportFile
