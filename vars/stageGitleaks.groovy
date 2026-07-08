@@ -11,7 +11,7 @@ def call(Map config = [:]) {
 
     stage('Security — Gitleaks') {
 
-        sh "[ -e ${reportDir} ] || mkdir -p ${reportDir}"
+        sh "echo ${WORKSPACE}; [ -e ${reportDir} ] || mkdir -p ${reportDir}"
 
         int exitCode = sh(
             returnStatus: true,
