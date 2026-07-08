@@ -19,7 +19,7 @@ def call(Map config = [:]) {
                 echo ${WORKSPACE}
                 podman run --rm \\
                     -v "\${WORKSPACE}:/repo:ro" \\
-                    -v "\${pwd}:/repo-analyzer:z" \\
+                    -v "\${PWD}:/repo-analyzer:z" \\
                     -w /repo \\
                     ${gitleaksImage} \\
                     detect \\
