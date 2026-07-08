@@ -1,3 +1,4 @@
+//----plugin Warning
 def call(Map config = [:]) {
     String analyzerImage = config.get(
         'analyzerImage',
@@ -9,8 +10,9 @@ def call(Map config = [:]) {
 
     stage('Security — GitLab Secret Detection') {
 
-        sh "[ -e ${reportDir} ] || mkdir -p ${reportDir}"
-
+        if (!fileExists(reportDir)) {
+            sh "mkdir -p ${reportDir}"
+        }
         int exitCode = sh(
             returnStatus: true,
             script: """
@@ -38,7 +40,7 @@ def call(Map config = [:]) {
             def report = readJSON file: reportFile
             vulnCount = report?.vulnerabilities?.size() ?: 0
             echo "GitLab Secret Detection found ${vulnCount} vulnerability(ies)."
-        } else{ echo "${reportFile}"}
+        }
 
         if (vulnCount > 0 && failOnLeaks) {
             error("GitLab Secret Detection found ${vulnCount} secret(s). Build failed.")

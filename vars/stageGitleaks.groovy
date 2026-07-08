@@ -1,6 +1,5 @@
+//----plugin Warning
 def call(Map config = [:]) {
-
-    // ── defaults ────────────────────────────────────────────────────────────
     String gitleaksImage = config.get('gitleaksImage', 'ghcr.io/gitleaks/gitleaks:v8.21.2')
     String reportDir     = config.get('reportDir',     'security-reports')
     String reportFile    = "${reportDir}/gitleaks-report.sarif"
@@ -11,7 +10,9 @@ def call(Map config = [:]) {
 
     stage('Security — Gitleaks') {
 
-        sh "[ -e ${reportDir} ] || mkdir -p ${reportDir}"
+        if (!fileExists(reportDir)) {
+            sh "mkdir -p ${reportDir}"
+        }
 
         int exitCode = sh(
             returnStatus: true,
