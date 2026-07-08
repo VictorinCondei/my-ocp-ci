@@ -1,6 +1,4 @@
 def call(Map config = [:]) {
-
-    // ── defaults ────────────────────────────────────────────────────────────
     String analyzerImage = config.get(
         'analyzerImage',
         'registry.gitlab.com/security-products/secrets:5'
@@ -40,7 +38,7 @@ def call(Map config = [:]) {
             def report = readJSON file: reportFile
             vulnCount = report?.vulnerabilities?.size() ?: 0
             echo "GitLab Secret Detection found ${vulnCount} vulnerability(ies)."
-        }
+        } else{ echo "${reportFile}"}
 
         if (vulnCount > 0 && failOnLeaks) {
             error("GitLab Secret Detection found ${vulnCount} secret(s). Build failed.")
