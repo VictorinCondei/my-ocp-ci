@@ -11,20 +11,22 @@ def call(Map config = [:]) {
 
     stage('Security — Gitleaks') {
 
-        sh "echo ${WORKSPACE}; [ -e ${reportDir} ] || mkdir -p ${reportDir}"
+        sh "[ -e ${reportDir} ] || mkdir -p ${reportDir}"
 
         int exitCode = sh(
             returnStatus: true,
             script: """
+                echo ${WORKSPACE}
                 podman run --rm \\
                     -v "\${WORKSPACE}:/repo:ro" \\
+                    -v "\${pwd}:/repo-analyzer:z" \\
                     -w /repo \\
                     ${gitleaksImage} \\
                     detect \\
                     --source /repo \\
                     ${configArg} \\
                     --report-format sarif \\
-                    --report-path /repo/${reportFile} \\
+                    --report-path /repo-analyzer/${reportFile} \\
                     --exit-code 1 \\
                     --log-level info
             """

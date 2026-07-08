@@ -20,6 +20,7 @@ def call(Map config = [:]) {
                     -e CI_PROJECT_DIR=/repo \\
                     -e SECURE_LOG_LEVEL=info \\
                     -v "\${WORKSPACE}:/repo" \\
+                    -v "\${pwd}:/repo-analyzer:z" \\
                     ${analyzerImage}
                 # Move report to the configured output dir
                 if [ -f "\${WORKSPACE}/gl-secret-detection-report.json" ]; then
