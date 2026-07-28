@@ -142,10 +142,10 @@ def call(Map config = [:]) {
             // -----------------------------------------------------------------
                 steps {
                     script {
-                        //quayTargets.each { t ->
-                        //    def fullImage = "${t.registry}/${t.organization}/${imageName}"
+                        quayTargets.each { t ->
+                            def fullImage = "${t.registry}/${t.organization}/${imageName}"
                         //    cleanupImages(fullImage, env.IMAGE_TAG, pushLatest)
-                        //}
+                        }
                     }
                 }
             }
@@ -155,9 +155,9 @@ def call(Map config = [:]) {
         post {
             always {
                 script {
-                    //quayTargets.each { t ->
-                    //    sh "podman logout '${t.registry}' || true"
-                    //}
+                    quayTargets.each { t ->
+                        sh "echo podman logout '${t.registry}' || true"
+                    }
                 }
             }
             success {
