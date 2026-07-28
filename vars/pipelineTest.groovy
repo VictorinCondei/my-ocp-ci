@@ -89,7 +89,7 @@ def call(Map config = [:]) {
                     script {
                         def primary   = quayTargets[0]
                         def fullImage = "${primary.registry}/${primary.organization}/${imageName}"
-
+                        sh "echo image $fullImage"
                         //buildPortalImage(
                         //    fullImage : fullImage,
                         //    tag       : env.IMAGE_TAG,
@@ -113,7 +113,7 @@ def call(Map config = [:]) {
                         quayTargets.eachWithIndex { t, i ->
                             if (i > 0) {
                                 def destFullImage = "${t.registry}/${t.organization}/${imageName}"
-                                sh "podman tag '${primaryFullImage}:${env.IMAGE_TAG}' '${destFullImage}:${env.IMAGE_TAG}'"
+                                //sh "podman tag '${primaryFullImage}:${env.IMAGE_TAG}' '${destFullImage}:${env.IMAGE_TAG}'"
                                 echo "Tagged → ${destFullImage}:${env.IMAGE_TAG}"
                             }
                         }

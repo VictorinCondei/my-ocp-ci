@@ -44,7 +44,7 @@ def call(Map config = [:]) {
                 echo "Logging in to ${registry}"
                 sh """
                     set +x
-                    echo "\$QUAY_PASS" | podman login '${registry}' \
+                    echo "\$QUAY_PASS" | echo podman login '${registry}' \
                       --username "\$QUAY_USER" \
                       --password-stdin
                 """
