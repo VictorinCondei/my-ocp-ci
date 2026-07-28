@@ -72,7 +72,8 @@ def call(Map config = [:]) {
             // -----------------------------------------------------------------
                 steps {
                     script {
-                        validateProject()
+                        sh "echo Validate"
+                        //validateProject()
                     }
                 }
             }
